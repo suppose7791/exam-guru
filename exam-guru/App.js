@@ -3,8 +3,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 // ─────────────────────────────────────────────────────────────────────────────
 //  ⚙️  CONFIGURATION — Replace these two values before deploying
 // ─────────────────────────────────────────────────────────────────────────────
-const GEMINI_API_KEY  = "AIzaSyDUscilYY9QNpR1Lodn1Lnz7S-rtMAs8Gg";   // Get from https://aistudio.google.com/
-const SHEETDB_API_URL = "https://sheetdb.io/api/v1/u4edfjgtz6cdc";      // Get from https://sheetdb.io
+const GEMINI_API_KEY  = process.env.REACT_APP_GEMINI_KEY;
+const SHEETDB_API_URL = process.env.REACT_APP_SHEETDB_URL;
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  CONSTANTS & KARNATAKA EXAM DATA
