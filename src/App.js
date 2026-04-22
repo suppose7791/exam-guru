@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState } from "react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  ⚙️ CONFIGURATION
 // ─────────────────────────────────────────────────────────────────────────────
 const GEMINI_API_KEY  = "AIzaSyDUscilYY9QNpR1Lodn1Lnz7S-rtMAs8Gg";
-const SHEETDB_API_URL = "https://sheetdb.io/api/v1/u4edfjgtz6cdc";
 
 const EXAMS = [
   { id: "kas",      label: "KAS",      full: "Karnataka Administrative Service (KPSC)", syllabus: "General Studies, Karnataka History & Geography" },
@@ -43,10 +42,9 @@ RULES:
 Question: ${question}`;
 
 export default function ExamGuru() {
-  const [screen, setScreen] = useState("solve");
-  const [selectedExam, setSelectedExam] = useState(EXAMS[0]);
-  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0]);
-  const [lang, setLang] = useState("English");
+  const [selectedExam] = useState(EXAMS[0]);
+  const [selectedSubject] = useState(SUBJECTS[0]);
+  const [lang] = useState("English");
   const [darkMode, setDarkMode] = useState(false);
   const [inputText, setInputText] = useState("");
   const [solving, setSolving] = useState(false);
@@ -70,7 +68,10 @@ export default function ExamGuru() {
     try {
       const res = await callGemini(SOLVE_PROMPT(selectedExam.full, selectedSubject.label, lang, inputText));
       setSolveResult(res);
-    } catch (e) { alert("AI Error."); }
+    } catch (e) { 
+      console.error(e);
+      alert("AI Error. Please check your connection."); 
+    }
     setSolving(false);
   };
 
@@ -78,35 +79,45 @@ export default function ExamGuru() {
 
   return (
     <div style={{ minHeight: "100vh", background: D ? "#121212" : "#f8f9fa", color: D ? "#fff" : "#333", padding: "20px", fontFamily: "sans-serif" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-        <h2>ExamGuru 🎓</h2>
-        <button onClick={() => setDarkMode(!D)}>{D ? "☀️" : "🌙"}</button>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <h2 style={{ margin: 0 }}>ExamGuru 🎓</h2>
+        <button 
+          onClick={() => setDarkMode(!D)} 
+          style={{ padding: "8px 12px", cursor: "pointer", borderRadius: "20px", border: "1px solid #ccc" }}
+        >
+          {D ? "☀️ Light" : "🌙 Dark"}
+        </button>
       </header>
 
-      <div style={{ background: D ? "#1e1e1e" : "#fff", padding: "15px", borderRadius: "10px", marginBottom: "20px" }}>
-         <p>Select Exam: {selectedExam?.label} | Subject: {selectedSubject?.label}</p>
+      <div style={{ background: D ? "#1e1e1e" : "#fff", padding: "15px", borderRadius: "10px", marginBottom: "20px", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}>
+         <p style={{ margin: 0, fontWeight: "bold" }}>Exam: <span style={{ color: "#c4781a" }}>{selectedExam?.label}</span></p>
+         <p style={{ margin: "5px 0 0 0", fontWeight: "bold" }}>Subject: <span style={{ color: "#1a5c8a" }}>{selectedSubject?.label}</span></p>
       </div>
 
       <textarea 
         value={inputText} 
         onChange={(e) => setInputText(e.target.value)} 
-        placeholder="Type your question..." 
-        style={{ width: "100%", height: "100px", marginBottom: "10px", padding: "10px" }}
+        placeholder="Type your question here (e.g. History of Kadambas)..." 
+        style={{ width: "100%", height: "120px", marginBottom: "15px", padding: "12px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box" }}
       />
       
       <button 
         onClick={solveQuestion} 
         disabled={solving} 
-        style={{ width: "100%", padding: "15px", background: "#c4781a", color: "#fff", border: "none", borderRadius: "8px" }}
+        style={{ width: "100%", padding: "15px", background: "#c4781a", color: "#fff", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", fontSize: "1rem" }}
       >
-        {solving ? "Analyzing..." : "Solve Now"}
+        {solving ? "ExamGuru is thinking..." : "Solve Now"}
       </button>
 
       {solveResult && (
-        <div style={{ marginTop: "20px", padding: "15px", background: D ? "#333" : "#e9ecef", borderRadius: "10px" }}>
-          <h4>Answer:</h4>
-          <p>{solveResult.answer}</p>
-          <small><b>Tip:</b> {solveResult.exam_tip}</small>
+        <div style={{ marginTop: "20px", padding: "20px", background: D ? "#333" : "#fff", borderRadius: "10px", borderLeft: "5px solid #c4781a", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}>
+          <h4 style={{ marginTop: 0, color: "#c4781a" }}>Answer:</h4>
+          <p style={{ lineHeight: "1.6" }}>{solveResult.answer}</p>
+          <hr style={{ opacity: 0.2 }} />
+          <p><strong>Explanation:</strong> {solveResult.explanation}</p>
+          <div style={{ background: "#fff9c4", padding: "10px", borderRadius: "5px", color: "#333", fontSize: "0.9rem" }}>
+            <b>💡 Exam Tip:</b> {solveResult.exam_tip}
+          </div>
         </div>
       )}
     </div>
